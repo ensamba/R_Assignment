@@ -1,0 +1,184 @@
+---
+title: "ensamba_R-assignment"
+output: html_document
+---
+###Uploading files 
+  **-fang_et_al_genotypes**
+```{}
+> fang_et_al_genotypes.txt <- read.table("https://raw.githubusercontent.com/EEOB-BioData/BCB546X-Fall2017/master/UNIX_Assignment/fang_et_al_genotypes.txt", header = TRUE)
+> View(fang_et_al_genotypes.txt)
+```
+ **snp_position.txt**
+ ```{r}
+ snp_position.txt <- read.deli("https://raw.githubusercontent.com/EEOB-BioData/BCB546X-Fall2017/master/UNIX_Assignment/snp_position.txt", header = TRUE)
+ View(snp_position.txt)
+ 
+ **Convert to dplyer**
+ 
+ fang_et_al_genotypes.txt_df<- tbl_df(fang_et_al_genotypes.txt)
+ 
+ Maize SNP IDS
+ Maize_SNP_ids <- filter(fang_et_al_genotypes.txt_df, Group == "ZMMIL" | Group == "ZMMLR" | Group == "ZMMMR")
+ View(Maize_SNP_ids)
+  typeof(Maize_SNP_ids)
+[1] "list"
+> class(Maize_SNP_ids)
+[1] "tbl_df"     "tbl"        "data.frame"
+ 
+ TEOSINTE SNP IDS
+ Teosinte_SNP_ids <- filter(fang_et_al_genotypes.txt_df, Group == "ZMPBA" | Group == "ZMPIL" | Group == "ZMPJA")
+ View(Teosinte_SNP_ids)
+ 
+ typeof(Teosinte_SNP_ids)
+[1] "list"
+> class(Teosinte_SNP_ids)
+[1] "tbl_df"     "tbl"        "data.frame"
+
+#####Second step is to transpose the data so that the columns becomes rows before joining them.
+**I will use the t. command**
+
+*Maize*
+```{r}
+t_Maize_SNP_ids <- t(Maize_SNP_ids)
+head(t_Maize_SNP_ids, 2)
+
+
+```
+ *Teosinte*
+```{r}
+t_Teosinte_SNP_ids <- t(Teosinte_SNP_ids)
+head(t_Teosinte_SNP_ids)
+
+* Only need certain columns from the `snp_position.txt` file for the analysis so we can cut those out by using the `select` function in dplyr:
+
+snp_position_df <- tbl_df(snp_position.txt)
+snp_position_sorted <- select(snp_position_df, SNP_ID, Chromosome, Position)
+View(snp_position_sorted)
+```
+Rename rownames in `snp_position.sorted`:
+This will help to create common columns to use during the  matching.,
+
+```{r}
+rownames(snp_position_sorted) <-snp_position_sorted$SNP_ID
+```
+* Now we need to join the `snp_position.sorted` with each of the maize group transposed and teosinte group transposed data files:
+**Maize**
+```{r}
+joined_Maize_SNP.txt <-merge(snp_position_sorted, t_Maize_SNP_ids, by ="row.names", all = FALSE )
+> View(joined_Maize_SNP.txt)
+```
+Teosinte
+```{r}
+joined_Teosinte_SNP.txt <-merge(snp_position_sorted, t_Teosinte_SNP_ids, by ="row.names", all = FALSE )
+> View(joined_Teosinte_SNP.txt)
+```
+**Data cleaning**
+Remove the column named row.names
+
+1. Maize
+Maize_data_joined <- joined_Maize_SNP.txt[,-1]
+View(Maize_data_joined)
+
+Removing multiple and unknown chromosome names
+**Maize**
+Maize_data_joined_u <- Maize_data_joined[!Maize_data_joined$Chromosome=="unknown"]
+
+Maize_data_C <- Maize_data_joined_u[!Maize_data_joined_u$Chromosome=="multiple"]
+
+2. Teosinte
+Teosinte_data_joined <- joined_Teosinte_SNP.txt[, -1]
+View(Teosinte_data_joined)
+```{r}
+```
+
+
+```{}
+Arrange in ascending
+```
+1. Maize
+Maize_data_C_Asc <- arrange(Maize_data_C, Position)
+View(Maize_data_C_Asc)
+
+2. Teosinte
+Teosinte_data_joined_Asc <- arrange(Teosinte_data_joined, Position)
+> View(Teosinte_data_joined_Asc)
+
+```{}
+```
+**Splitting data by Chromosome**
+1. Maize
+Split_Maize_group_chr <-split(Maize_data_C_Asc, Maize_data_C$Chromosome)
+
+2. Teosinte
+Split_Teosinte_group_chr <-split(Teosinte_data_joined_Asc, Teosinte_data_joined_Asc$Chromosome)
+```{r}
+```
+1. Maize
+sapply(names(Split_Maize_group_chr), function(x) write.table(Split_Maize_group_chr[[x]], file=paste(x, "txt", sep = ".")))
+2. Teosinte
+sapply(names(Split_Teosinte_group_chr), function(x) write.table(Split_Teosinte_group_chr[[x]], file=paste(x, "txt", sep = ".")))
+apply function to all Maize and SNP 
+```{}
+```
+Assorted data in ascending order by position and converted it to dyplyer
+```{}
+```
+1.Maize 
+Maize_data_C_Asc <- arrange(Maize_data_C, Position)
+View(Maize_data_C_Asc)
+Maize_data_C_Asc_df <- tbl_df(Maize_data_C_Asc)
+View(Maize_data_C_Asc_df)
+
+2. Teosinte
+Teosinte_data_joined_Asc <- arrange(Teosinte_data_joined, Position)
+> View(Teosinte_data_joined_Asc)
+
+Teosinte_data_joined_Asc_df <-tbl_df(Teosinte_data_joined_Asc)
+> View(Teosinte_data_joined_Asc_df)
+```{r}
+```
+Arranging Chromosomes by increasing position
+```{r}
+```
+Chromosome 1.
+Maize_Chr1_increase.txt <- Maize_data_C_Asc_df[Maize_data_C_Asc_df$Chromosome ==1,]
+> View(Maize_Chr1_increase.txt)
+
+chr1_Maize_Asc <- Maize_Chr1_increase.txt[order(as.numeric(as.character(Maize_Chr1_increase.txt$Position))),]
+> View(chr1_Maize_Asc)
+
+Decreasing
+chr1_Maize_decr <- Maize_Chr1_increase.txt[order(as.numeric(as.character(Maize_Chr1_increase.txt$Position)), decreasing = TRUE),]
+> View(chr1_Maize_decr)
+
+and missing data encoded by a **-** :
+ Maize_Chr1_Decr <- as.data.frame(lapply(chr1_Maize_decr, FUN = function(x)as.character(gsub("\\?", "-", x))))
+> View(Maize_Chr1_Decr)
+
+Writing to a file and push on a repository
+write.csv(chr1_Maize_Asc, file = "R_Assignment_ensamba/chr1_Maize_Asc.csv", row.names = F)
+
+write.csv(Maize_Chr1_Decr, file = "R_Assignment_ensamba/Maize_Chr1_Decr.csv", row.names = F)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
