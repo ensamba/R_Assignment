@@ -1,0 +1,20 @@
+---
+title: "Liu_review"
+author: "Ang-Yu Liu"
+date: "Oct/18/2017"
+output: html_document
+---
+
+1. For merging the files by SNP ID, no need to rename the row name in two files. Can do like merge = (file1, file2, by.x = "SNP_ID", by.y = "Sample_ID")
+
+2. No need to loading modules repeatedly. 
+
+3. I got problems in using arrnage function to order the SNP by position, so I just wonder how to get it work properly. 
+
+4. Ordering the data with Ascending or Descending: Once is enough. I am not sure for what reason but you have done it probably twice at different steps.
+
+5. For the first plotting (SNP per chromosome), the scale for Y (SNP number) in all groups is wrong. It is also weird to have the same scale in three of the plots (ALL, Maize, and Teosinate). I did not check the intermediate files you mentioned in the code but threre might be some mistake here.
+
+6. For hte second plot (Proportion of Homozygosity/heterozygosity/NA), the one you presented is not the question asked for. The proportion of heterozigosity/homozygosity and NA is not presented in the plot. You probably made a mistake in the melting step in your coding.
+
+7. For the plot made designed by your won idea, I fell like it is cool to plot the distribution of all SNP ID on the chromosomes in Teosinate by position. Just wonder how similarity the plot of Maize will be.
